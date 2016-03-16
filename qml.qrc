@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ArticleDel.qml</file>
+        <file>TopBar.qml</file>
+        <file>ThreadDel.qml</file>
+        <file>../../Pictures/Republicanlogo.svg.png</file>
+        <file>MainPageDel.qml</file>
+        <file>SettingsBar.qml</file>
+        <file>Settings.qml</file>
+        <file>../../Pictures/DemocraticLogo.png</file>
+        <file>EditIcon.qml</file>
+        <file>PostFontSize.qml</file>
+        <file>thread.xml</file>
+        <file>MainThreads.xml</file>
+        <file>PostOptions.qml</file>
+        <file>Thread.qml</file>
+        <file>Reply.qml</file>
+    </qresource>
+</RCC>
