@@ -125,6 +125,18 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
     socket->write(array);
 }
 
+void clientSender::update(QString fileName)
+{
+    QFile file(fileName);
+    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    socket->write(file.readAll());
+    if(socket->waitForReadyRead()){
+        file.write(socket->readAll());
+    }else{
+        socket->error();
+    }
+}
+
 void clientSender::articleAdder(QDomDocument doc, QString article)
 {
     QDomElement ele = doc.firstChildElement("articles");
