@@ -25,6 +25,7 @@ public:
     Q_INVOKABLE void fairVote(QString file, QString article);
     Q_INVOKABLE void biasVote(QString file, QString article);
     Q_INVOKABLE void newThread(QString title, QString articles[], QString text, QString icon);
+    Q_INVOKABLE void update(QString fileName);
     void articleAdder(QDomDocument file, QString article);
 
 
