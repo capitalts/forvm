@@ -27,7 +27,7 @@ ApplicationWindow{
 
         XmlListModel{
             id: mainModel
-            source: "qrc:/MainThreads.xml"
+            source: "MainThreads.xml"
             query: "/threads/thread"
 
             XmlRole{

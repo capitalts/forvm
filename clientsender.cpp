@@ -45,7 +45,7 @@ void clientSender::addArticle(QString file, QString article)
 
 void clientSender::fairVote(QString file, QString article)
 {
-    QDomDocument doc(file);
+    QDomDocument doc;
     QFile newFile(file);
     doc.setContent(&newFile);
     QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
@@ -67,11 +67,14 @@ void clientSender::fairVote(QString file, QString article)
     socket->write(array);
 }
 
-void clientSender::biasVote(QString file, QString article)
+void clientSender::biasVote(QString fileName, QString article)
 {
-    QDomDocument doc(file);
+    QFile file(fileName);
+    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    QDomDocument doc;
+    doc.setContent(&file);
     QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
-    QDomElement header = doc.createElement("header");
+    QDomElement header = doc.firstChildElement("header");
     header.setNodeValue("bias");
     doc.appendChild(procInst);
     QDomNode ele = doc.firstChildElement("root");
@@ -86,12 +89,13 @@ void clientSender::biasVote(QString file, QString article)
         articleTag = articleTag.nextSibling();
     }
     QByteArray array = doc.toByteArray();
-
+    file.write(array);
     if(socket->isOpen()){
-        socket->write(array);
+        socket->write(file.readAll());
     }else{
        qDebug() << "Socket not open";
     }
+    file.close();
 }
 
 
@@ -100,7 +104,7 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
     time_t now = time(0);
     QDomDocument doc;
     QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
-    QDomElement header = doc.createElement("header");
+    QDomElement header = doc.elementById("header");
     header.setNodeValue("newThread");
     doc.appendChild(procInst);
     QDomElement root = doc.createElement("root");
@@ -134,12 +138,12 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
 void clientSender::update(QString fileName)
 {
     QFile file(fileName);
-    file.open(QIODevice::ReadWrite);
-    if(file.isOpen()){
+
+    if(file.open(QIODevice::ReadWrite)){
         socket->write(file.readAll());
         if(socket->waitForReadyRead()){
             if(socket->isReadable()){
-            file.write(socket->readAll());
+                file.write(socket->readAll());
             }
             else{
                 qDebug() << "Socket not readable";
@@ -150,6 +154,7 @@ void clientSender::update(QString fileName)
     }else{
         qDebug() << "file not open";
     }
+    file.close();
 
 }
 

@@ -3,6 +3,6 @@
     <thread>
         <title>Trump's Health</title>
         <imageSrc>http://i2.cdn.turner.com/cnnnext/dam/assets/160103005109-malheur-national-wildlife-refuge-large-169.jpg</imageSrc>
-        <source>qrc:/thread.xml</source>
+        <source>thread.xml</source>
     </thread>
 </threads>
