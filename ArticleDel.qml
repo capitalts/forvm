@@ -1,5 +1,4 @@
 import QtQuick 2.4
-
 Component{
     Rectangle{
         id: article
@@ -39,6 +38,14 @@ Component{
                 anchors.centerIn: parent
                 text: bias.toString()
             }
+            MouseArea{
+                id: biasClick
+                anchors.fill: parent
+                onClicked:{
+                    client.biasVote(threadSource, artSource)
+                    client.update(threadSource);
+                }
+            }
         }
         Rectangle{
             id: fairs
@@ -53,6 +60,14 @@ Component{
             Text{
                 anchors.centerIn: parent
                 text: fair.toString()
+            }
+            MouseArea{
+                id: fairClick
+                anchors.fill: parent
+                onClicked: {
+                    client.fairVote(threadSource, artSource)
+                    client.update(threadSource)
+                }
             }
         }
 

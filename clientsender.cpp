@@ -1,5 +1,5 @@
 #include "clientsender.h"
-
+#include <QtCore/QDebug>
 clientSender::clientSender(QObject *parent) : QObject(parent)
 {
 
@@ -86,7 +86,12 @@ void clientSender::biasVote(QString file, QString article)
         articleTag = articleTag.nextSibling();
     }
     QByteArray array = doc.toByteArray();
-    socket->write(array);
+
+    if(socket->isOpen()){
+        socket->write(array);
+    }else{
+       qDebug() << "Socket not open";
+    }
 }
 
 
@@ -123,18 +128,29 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
     doc.appendChild(root);
     QByteArray array = doc.toByteArray();
     socket->write(array);
+
 }
 
 void clientSender::update(QString fileName)
 {
     QFile file(fileName);
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
-    socket->write(file.readAll());
-    if(socket->waitForReadyRead()){
-        file.write(socket->readAll());
+    file.open(QIODevice::ReadWrite);
+    if(file.isOpen()){
+        socket->write(file.readAll());
+        if(socket->waitForReadyRead()){
+            if(socket->isReadable()){
+            file.write(socket->readAll());
+            }
+            else{
+                qDebug() << "Socket not readable";
+            }
+        }else{
+            socket->error();
+        }
     }else{
-        socket->error();
+        qDebug() << "file not open";
     }
+
 }
 
 void clientSender::articleAdder(QDomDocument doc, QString article)
