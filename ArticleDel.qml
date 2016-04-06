@@ -42,8 +42,10 @@ Component{
                 id: biasClick
                 anchors.fill: parent
                 onClicked:{
+
                     client.biasVote(threadSource, artSource)
                     client.update(threadSource);
+
                 }
             }
         }

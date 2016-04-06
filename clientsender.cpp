@@ -166,8 +166,8 @@ void clientSender::articleAdder(QDomDocument doc, QString article)
     QDomElement fair = doc.createElement("fair");
     QDomElement bias = doc.createElement("bias");
     source.appendChild(doc.createTextNode(article));
-    fair.setNodeValue("0");
-    bias.setNodeValue("0");
+    fair.setNodeValue(0);
+    bias.setNodeValue(0);
     articleTag.appendChild(source);
     articleTag.appendChild(fair);
     articleTag.appendChild(bias);
