@@ -17,12 +17,12 @@ Component{
             }
             Text{
                 id: title
-                text: threadTitle
+                text: thrdTitle
                 anchors.bottom: articleImage.bottom
                 anchors.left: parent.left
                 wrapMode: Text.WordWrap
                 color: "black"
-                font.pointSize: 12
+                font.pointSize: postFontSize
                 width:articleImage.width
             }
             MouseArea{

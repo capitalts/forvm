@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QFile>
 #include <QTcpSocket>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #include <QNetworkReply>
 #include <QtXml>
 #include <ctime>

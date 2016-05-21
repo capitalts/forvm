@@ -12,9 +12,7 @@ void clientSender::sendPost(QString file, QString articles[], QString postText, 
     QDomDocument doc;
     QFile newFile(file);
     doc.setContent(&newFile);
-    QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
-    QDomElement header = doc.createElement("header");
-    doc.appendChild(procInst);
+    QDomElement header = doc.firstChildElement("header");
     header.setNodeValue("post");
     if(sizeof(articles) > 0){
         for(int i = 0; i < sizeof(articles); i++){
@@ -43,54 +41,70 @@ void clientSender::addArticle(QString file, QString article)
     socket->write(array);
 }
 
-void clientSender::fairVote(QString file, QString article)
+void clientSender::fairVote(QString fileName, QString article)
 {
+    qDebug() << "fairChanged";
+    qDebug() << fileName;
+    qDebug() << article;
+    QFile file("/home/tory/Qtprojects/Forvm/" + fileName);
+    file.open(QIODevice::ReadWrite);
     QDomDocument doc;
-    QFile newFile(file);
-    doc.setContent(&newFile);
-    QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
+    doc.setContent(&file);
+    QDomNode ele = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
-    header.setNodeValue("fair");
-    doc.appendChild(procInst);
-    QDomNode ele = doc.firstChildElement("root");
-    QDomElement articles = ele.firstChildElement("article");
+    header.appendChild(doc.createTextNode("fairChanged"));
+    doc.insertBefore(header,ele);
+    QDomElement articles = ele.firstChildElement("articles").toElement();
     QDomNode articleTag = articles.firstChild();
-    if(articleTag.firstChildElement("source").nodeValue() == article){
-        QDomNode fairTag = articleTag.firstChildElement("fair");
-        int fairVal = fairTag.nodeValue().toInt();
-        fairVal++;
-        fairTag.replaceChild(doc.createTextNode(QString::number(fairVal)), fairTag.firstChild());
-    }else{
+    do{
+        if(articleTag.firstChildElement("source").text() == article){
+            QDomElement fairTag = articleTag.firstChildElement("fair");
+            int fairVal = fairTag.text().toInt();
+            fairVal++;
+            fairTag.replaceChild(doc.createTextNode(QString::number(fairVal)), fairTag.firstChild());
+        }
         articleTag = articleTag.nextSibling();
-    }
+    }while(articleTag.firstChildElement("source").text() != article && !articleTag.isNull());
+    qDebug() << doc.toString();
     QByteArray array = doc.toByteArray();
-    socket->write(array);
+    file.write(array);
+    if(socket->isOpen()){
+        qDebug() << "Writing...";
+        socket->write(file.readAll());
+    }else{
+       qDebug() << "Socket not open";
+    }
 }
 
 void clientSender::biasVote(QString fileName, QString article)
 {
-    QFile file(fileName);
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    qDebug() << "Bias Vote";
+    qDebug() << fileName;
+    qDebug() << article;
+    QFile file("/home/tory/Qtprojects/Forvm/" + fileName);
+    file.open(QIODevice::ReadWrite);
     QDomDocument doc;
     doc.setContent(&file);
-    QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
-    QDomElement header = doc.firstChildElement("header");
-    header.setNodeValue("bias");
-    doc.appendChild(procInst);
-    QDomNode ele = doc.firstChildElement("root");
-    QDomElement articles = ele.firstChildElement("article");
+    QDomNode ele = doc.firstChildElement("thread");
+    QDomElement header = doc.createElement("header");
+    header.appendChild(doc.createTextNode("biasChanged"));
+    doc.insertBefore(header,ele);
+    QDomElement articles = ele.firstChildElement("articles").toElement();
     QDomNode articleTag = articles.firstChild();
-    if(articleTag.firstChildElement("source").nodeValue() == article){
-        QDomNode biasTag = articleTag.firstChildElement("bias");
-        int biasVal = biasTag.nodeValue().toInt();
-        biasVal++;
-        biasTag.replaceChild(doc.createTextNode(QString::number(biasVal)), biasTag.firstChild());
-    }else{
+    do{
+        if(articleTag.firstChildElement("source").text() == article){
+            QDomElement biasTag = articleTag.firstChildElement("bias");
+            int biasVal = biasTag.text().toInt();
+            biasVal++;
+            biasTag.replaceChild(doc.createTextNode(QString::number(biasVal)), biasTag.firstChild());
+        }
         articleTag = articleTag.nextSibling();
-    }
+    }while(articleTag.firstChildElement("source").text() != article && !articleTag.isNull());
+    qDebug() << doc.toString();
     QByteArray array = doc.toByteArray();
     file.write(array);
     if(socket->isOpen()){
+        qDebug() << "Writing...";
         socket->write(file.readAll());
     }else{
        qDebug() << "Socket not open";
@@ -104,11 +118,11 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
     time_t now = time(0);
     QDomDocument doc;
     QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
-    QDomElement header = doc.elementById("header");
-    header.setNodeValue("newThread");
     doc.appendChild(procInst);
     QDomElement root = doc.createElement("root");
-    root.attribute(title + now);
+    root.attribute(title + now);  
+    QDomElement header = doc.createElement("header");
+    header.setNodeValue("newThread");
     QDomElement thread = doc.createElement("thread");
     QDomElement head = doc.createElement("head");
     head.appendChild(doc.createTextNode(title));
@@ -137,9 +151,9 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
 
 void clientSender::update(QString fileName)
 {
-    QFile file(fileName);
+    QFile file("/home/tory/Qtprojects/Forvm/" + fileName);
 
-    if(file.open(QIODevice::ReadWrite)){
+    if(file.open(QIODevice::ReadWrite | QIODevice::Truncate)){
         socket->write(file.readAll());
         if(socket->waitForReadyRead()){
             if(socket->isReadable()){

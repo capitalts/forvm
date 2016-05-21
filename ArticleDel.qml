@@ -44,7 +44,7 @@ Component{
                 onClicked:{
 
                     client.biasVote(threadSource, artSource)
-                    client.update(threadSource);
+                    //client.update(threadSource);
 
                 }
             }
