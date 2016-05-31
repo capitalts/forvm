@@ -11,8 +11,6 @@
         <file>../../Pictures/DemocraticLogo.png</file>
         <file>EditIcon.qml</file>
         <file>PostFontSize.qml</file>
-        <file>thread.xml</file>
-        <file>MainThreads.xml</file>
         <file>PostOptions.qml</file>
         <file>Thread.qml</file>
         <file>Reply.qml</file>

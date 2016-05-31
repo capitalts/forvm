@@ -27,7 +27,7 @@ ApplicationWindow{
 
         XmlListModel{
             id: mainModel
-            source: "MainThreads.xml"
+            source: "file:///home/tory/Qtprojects/ForvmXMLFiles/MainThreads.xml"
             query: "/threads/thread"
 
             XmlRole{

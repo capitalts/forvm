@@ -44,7 +44,7 @@ Component{
                 onClicked:{
 
                     client.biasVote(threadSource, artSource)
-                    //client.update(threadSource);
+                    client.update(threadSource);
 
                 }
             }
@@ -68,7 +68,7 @@ Component{
                 anchors.fill: parent
                 onClicked: {
                     client.fairVote(threadSource, artSource)
-                    client.update(threadSource)
+                   // client.update(threadSource)
                 }
             }
         }

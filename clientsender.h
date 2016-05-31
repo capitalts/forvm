@@ -18,6 +18,7 @@ private:
     QTcpSocket* socket;
     QNetworkAccessManager qnam;
     QNetworkReply *reply;
+    QString currentFileName;
 
 
 public:
@@ -29,12 +30,14 @@ public:
     Q_INVOKABLE void newThread(QString title, QString articles[], QString text, QString icon);
     Q_INVOKABLE void update(QString fileName);
     void articleAdder(QDomDocument file, QString article);
-
-
+    void doConnect();
 signals:
 
 public slots:
-
+    void connected();
+    void disconnected();
+    void bytesWritten(qint64 bytes);
+    void readyRead();
 };
 
 #endif // CLIENTSENDER_H

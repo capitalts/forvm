@@ -16,8 +16,6 @@ QML_IMPORT_PATH +=
 include(deployment.pri)
 
 DISTFILES += \
-    thread.xml \
-    MainThreads.xml \
     ../../Qtprojects/QmlTutorials/file.qml
 
 HEADERS += \
