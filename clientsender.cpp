@@ -10,7 +10,7 @@ void clientSender::doConnect()
     connect(socket, SIGNAL(connected()),this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()),this, SLOT(disconnected()));
     connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
-    connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+    connect(socket, SIGNAL(readyRead()),this, SLOT(readyToRead()));
 
     qDebug() << "connecting...";
 
@@ -40,13 +40,19 @@ void clientSender::bytesWritten(qint64 bytes)
     qDebug() << bytes << " bytes written...";
 }
 
-void clientSender::readyRead()
+void clientSender::readyToRead()
 {
     qDebug() << "reading...";
-    QFile file(currentFileName);
-    if(file.open(QIODevice::ReadWrite | QIODevice::Truncate)){
+    QByteArray data = socket->readAll();
+    QDomDocument doc;
+    doc.setContent(data);
+    QDomElement thread = doc.firstChildElement("thread");
+    QString filename = thread.firstChildElement("fileName").text();
+    QFile file("/home/tory/Qtprojects/ForvmXMLFiles/" + filename);
+    file.resize(0);
+    if(file.open(QIODevice::WriteOnly)){
     // read the data from the socket
-    file.write(socket->readAll());
+        file.write(data);
     }else{
         qDebug() << "file not open";
     }
@@ -94,36 +100,38 @@ void clientSender::addArticle(QString fileName, QString article)
 void clientSender::fairVote(QString fileName, QString article)
 {
     qDebug() << "fairChanged";
-    currentFileName.clear();
-    currentFileName.append("/home/tory/Qtprojects/ForvmXMLFiles/" + fileName);
+    currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
 
     qDebug() << currentFileName;
     QFile file(currentFileName);
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
     QDomDocument doc;
+    file.open(QIODevice::ReadWrite);
     doc.setContent(&file);
-    qDebug() << file.size();
-    qDebug() << doc.toString();
-//    QDomNode ele = doc.firstChildElement("thread");
-//    QDomElement header = doc.createElement("header");
-//    header.appendChild(doc.createTextNode("fairChanged"));
-//    ele.appendChild(header);
-//    QDomElement articles = ele.firstChildElement("articles").toElement();
-//    QDomNode articleTag = articles.firstChild();
-//    do{
-//        if(articleTag.firstChildElement("source").text() == article){
-//            QDomElement fairTag = articleTag.firstChildElement("fair");
-//            int fairVal = fairTag.text().toInt();
-//            fairVal++;
-//            fairTag.replaceChild(doc.createTextNode(QString::number(fairVal)), fairTag.firstChild());
-//        }
-//        articleTag = articleTag.nextSibling();
-//    }while(articleTag.firstChildElement("source").text() != article && !articleTag.isNull());
-//    qDebug() << doc.toString();
-//    QByteArray array = doc.toByteArray();
-//    file.write(array);
-//    qDebug() << "Writing...";
-//    socket->write(file.readAll());
+    file.resize(0);
+    QDomNode ele = doc.firstChildElement("thread");
+    QDomElement header = doc.createElement("header");
+    header.appendChild(doc.createTextNode("fairChanged"));
+    ele.appendChild(header);
+    QDomElement articles = ele.firstChildElement("articles").toElement();
+    QDomNode articleTag = articles.firstChild();
+    do{
+        if(articleTag.firstChildElement("source").text() == article){
+            QDomElement fairTag = articleTag.firstChildElement("fair");
+            int fairVal = fairTag.text().toInt();
+            fairVal++;
+            fairTag.replaceChild(doc.createTextNode(QString::number(fairVal)), fairTag.firstChild());
+        }
+        articleTag = articleTag.nextSibling();
+    }while(articleTag.firstChildElement("source").text() != article && !articleTag.isNull());
+    QByteArray array = doc.toByteArray();
+    file.write(array);
+    if(socket->isOpen()){
+        qDebug() << "Writing...";
+        socket->write(array);
+        qDebug() << "Done Writing";
+    }else{
+       qDebug() << "Socket not open";
+    }
     file.close();
 }
 
@@ -131,16 +139,16 @@ void clientSender::biasVote(QString fileName, QString article)
 {
     qDebug() << "Bias Vote";
     qDebug() << fileName;
-    qDebug() << article;
     currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
     QFile file(currentFileName);
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    file.open(QIODevice::ReadWrite);
     QDomDocument doc;
     doc.setContent(&file);
+    file.resize(0);
     QDomNode ele = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("biasChanged"));
-    doc.insertBefore(header,ele);
+    ele.appendChild(header);
     QDomElement articles = ele.firstChildElement("articles").toElement();
     QDomNode articleTag = articles.firstChild();
     do{
@@ -156,7 +164,8 @@ void clientSender::biasVote(QString fileName, QString article)
     file.write(array);
     if(socket->isOpen()){
         qDebug() << "Writing...";
-        socket->write(file.readAll());
+        socket->write(array);
+        qDebug() << "Done Writing";
     }else{
        qDebug() << "Socket not open";
     }
@@ -205,7 +214,7 @@ void clientSender::update(QString fileName)
     currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
     QFile file(currentFileName);
     qDebug() << "update file";
-    if(file.open(QIODevice::ReadWrite | QIODevice::Truncate)){
+    if(file.open(QIODevice::ReadWrite)){
         socket->write(file.readAll());
     }else{
         qDebug() << "file not open";

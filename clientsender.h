@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QFile>
 #include <QTcpSocket>
+#include <QAbstractSocket>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <QNetworkReply>
 #include <QtXml>
 #include <ctime>
 
@@ -16,8 +16,6 @@ class clientSender : public QObject
     Q_OBJECT
 private:
     QTcpSocket* socket;
-    QNetworkAccessManager qnam;
-    QNetworkReply *reply;
     QString currentFileName;
 
 
@@ -37,7 +35,7 @@ public slots:
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);
-    void readyRead();
+    void readyToRead();
 };
 
 #endif // CLIENTSENDER_H
