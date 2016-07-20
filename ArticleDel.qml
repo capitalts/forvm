@@ -38,13 +38,16 @@ Component{
                 anchors.centerIn: parent
                 text: bias.toString()
             }
+
             MouseArea{
                 id: biasClick
                 anchors.fill: parent
                 onClicked:{
-
                     client.biasVote(threadSource, artSource)
                     artModel.reload()
+
+                    biasClick.visible = false
+                    fairClick.visible = false
                 }
             }
         }
@@ -68,6 +71,8 @@ Component{
                 onClicked: {
                     client.fairVote(threadSource, artSource)
                     artModel.reload()
+                    biasClick.visible = false
+                    fairClick.visible = false
                 }
             }
         }

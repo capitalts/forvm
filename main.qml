@@ -14,6 +14,7 @@ ApplicationWindow{
         "liberal": ":/../../Pictures/DemocraticLogo.png"};
     property string articleUrl: ""
     property string threadTitle: ""
+
     Rectangle{
         id: root
         anchors.fill: parent
@@ -64,15 +65,10 @@ ApplicationWindow{
             x: root.width
             y: topBar.height
         }
-
-        Reply{
-            id: reply
-            state: "REPLYNOTVISIBLE"
-        }
-
         TopBar {
             id: topBar
         }
+
         Settings{
             id: sets
             x: root.width
@@ -114,11 +110,11 @@ ApplicationWindow{
                     target: sets
                     x: root.width
                 }
-                PropertyChanges {
-                    target: reply
-                    state: "REPLYNOTVISIBLE"
+//                PropertyChanges {
+//                    target: thread.replyState
+//                    state: "REPLYNOTVISIBLE"
 
-                }
+//                }
             },
             State{
                 name:"THREAD"
@@ -135,11 +131,11 @@ ApplicationWindow{
                     target: thread
                     x: 0
                 }
-                PropertyChanges{
-                    target:reply
-                    state: "REPLYNOTVISIBLE"
+//                PropertyChanges{
+//                    target: thread.replyState
+//                    state: "REPLYNOTVISIBLE"
 
-                }
+//                }
             },
             State{
                 name: "SETTINGS"

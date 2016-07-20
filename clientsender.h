@@ -21,7 +21,7 @@ private:
 
 public:
     explicit clientSender(QObject *parent = 0);
-    Q_INVOKABLE void sendPost(QString file, QString articles[], QString postText, QString icon);
+    Q_INVOKABLE void sendPost(QString file, QString articles, QString postText, QString icon);
     Q_INVOKABLE void addArticle(QString file, QString article);
     Q_INVOKABLE void fairVote(QString file, QString article);
     Q_INVOKABLE void biasVote(QString file, QString article);

@@ -1,7 +1,9 @@
-import QtQuick 2.4
+ import QtQuick 2.4
 
 Component{
     id: threadDel
+
+
     Rectangle{
 
         id: postRect
@@ -94,7 +96,10 @@ Component{
             state: "POSTOPNOTVISIBLE"
         }
 
+
+
     }
+
 
 }
 

@@ -1,56 +1,12 @@
 import QtQuick 2.4
-
 Rectangle {
+    property variant arts: [""]
     id: replyRect
     width: background.width
     height: background.height/1.1
-    y: topBar.height
+    y: 0
     color: "darkgrey"
     state: "REPLYNOTVISIBLE"
-    Rectangle{
-        id: submit
-        width: replyRect.width/2.01
-        height: background.height - replyRect.height - 5
-        anchors.top: replyRect.bottom
-        anchors.topMargin: 5
-        anchors.right: replyRect.right
-        color: "darkgrey"
-        Text{
-            id: submitText
-            anchors.centerIn: parent
-            text: qsTr("Submit")
-        }
-        MouseArea{
-            id:submitMA
-            anchors.fill: parent
-            onClicked: {
-            replyRect.state = "SUBMITCLICKED"
-
-            }
-        }
-    }
-    Rectangle{
-        id: cancel
-        width: background.width/2.01
-        height: background.height - replyRect.height - 5
-        anchors.top: replyRect.bottom
-        anchors.topMargin: 5
-        anchors.left: replyRect.left
-        color: "darkgrey"
-        Text{
-            id: cancelText
-            anchors.centerIn: parent
-            text: qsTr("Cancel")
-        }
-        MouseArea{
-            id:cancelMA
-            anchors.fill: parent
-            onClicked: {
-                replyRect.state = "CANCELCLICKED"
-                cancel.color = "lightGrey"
-            }
-        }
-    }
 
     Text {
         id: postIn
@@ -133,6 +89,7 @@ Rectangle {
                 x: root.width
                 enabled: false
             }
+
         },
         State{
             name: "CANCELCLICKED"
@@ -231,4 +188,5 @@ Rectangle {
         }
     ]
 }
+
 

@@ -60,29 +60,43 @@ void clientSender::readyToRead()
 
 }
 
-void clientSender::sendPost(QString fileName, QString articles[], QString postText, QString icon)
+void clientSender::sendPost(QString fileName, QString articles, QString postText, QString icon)
 {
-    QDomDocument doc;
     currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
     QFile file(currentFileName);
+    QDomDocument doc;
+    file.open(QIODevice::ReadWrite);
     doc.setContent(&file);
-    QDomElement header = doc.firstChildElement("header");
-    header.setNodeValue("post");
-    if(sizeof(articles) > 0){
-        for(int i = 0; i < sizeof(articles); i++){
-                articleAdder(doc, articles[i]);
-        }
-    }
-    QDomElement root = doc.firstChildElement("root");
-    QDomElement posts = root.firstChildElement("posts");
-    QDomElement post = doc.createElement("postText");
+    file.resize(0);
+    QDomNode ele = doc.firstChildElement("thread");
+    QDomElement header = doc.createElement("header");
+    header.appendChild(doc.createTextNode("post"));
+//    if(sizeof(articles) > 0){
+//        for(int i = 0; i < sizeof(articles); i++){
+//                articleAdder(doc, articles[i]);
+//        }
+//    }
+    QDomElement posts = ele.firstChildElement("posts");
+    QDomElement post = doc.createElement("post");
+    QDomElement postTextEle = doc.createElement("postText");
     QDomElement postIcon = doc.createElement("icon");
-    post.appendChild(doc.createTextNode(postText));
+    postTextEle.appendChild(doc.createTextNode(postText));
     postIcon.appendChild(doc.createTextNode(icon));
+    post.appendChild(postIcon);
+    post.appendChild(postTextEle);
     posts.appendChild(post);
+    ele.appendChild(header);
 
     QByteArray array = doc.toByteArray();
-    socket->write(array);
+
+    if(socket->isOpen()){
+        qDebug() << "Writing...";
+        socket->write(array);
+        qDebug() << "Done Writing";
+    }else{
+       qDebug() << "Socket not open";
+    }
+    file.close();
 }
 
 void clientSender::addArticle(QString fileName, QString article)

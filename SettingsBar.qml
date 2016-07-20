@@ -65,7 +65,7 @@ Rectangle {
                                root.state = sig
                            }
                             else if (name == "New Post"){
-                                reply.state = sig
+                                thread.replyState = sig
                            }
                          }
             }

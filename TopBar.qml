@@ -2,6 +2,7 @@ import QtQuick 2.4
 import QtQuick.Window 2.2
 Rectangle{
     id: topBar
+    property alias setMA: settingsMA
     anchors.top: root.top
     width: root.width
     height: root.height/15
