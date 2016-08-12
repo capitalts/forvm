@@ -35,7 +35,7 @@ Rectangle {
         }
         ListElement{
             name: "Add Article"
-            sig: "Add Article Clicked"
+            sig: "ARTADDVISIBLE"
         }
         ListElement{
             name: "Help"
@@ -65,7 +65,9 @@ Rectangle {
                                root.state = sig
                            }
                             else if (name == "New Post"){
-                                thread.replyState = sig
+                                thread.replyState.state = sig
+                           } else if(name == "Add Article"){
+                                thread.artAddState.state = sig
                            }
                          }
             }

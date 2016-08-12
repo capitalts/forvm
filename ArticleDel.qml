@@ -43,6 +43,7 @@ Component{
                 id: biasClick
                 anchors.fill: parent
                 onClicked:{
+                    console.log("artSource " + artSource)
                     client.biasVote(threadSource, artSource)
                     artModel.reload()
 

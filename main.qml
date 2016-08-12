@@ -110,11 +110,11 @@ ApplicationWindow{
                     target: sets
                     x: root.width
                 }
-//                PropertyChanges {
-//                    target: thread.replyState
-//                    state: "REPLYNOTVISIBLE"
+                PropertyChanges {
+                    target: thread.replyState
+                    state: "REPLYNOTVISIBLE"
 
-//                }
+                }
             },
             State{
                 name:"THREAD"
@@ -131,11 +131,11 @@ ApplicationWindow{
                     target: thread
                     x: 0
                 }
-//                PropertyChanges{
-//                    target: thread.replyState
-//                    state: "REPLYNOTVISIBLE"
+                PropertyChanges{
+                    target: thread.replyState
+                    state: "REPLYNOTVISIBLE"
 
-//                }
+                }
             },
             State{
                 name: "SETTINGS"

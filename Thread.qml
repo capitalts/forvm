@@ -1,8 +1,10 @@
 import QtQuick 2.4
 import QtQuick.XmlListModel 2.0
+
 Rectangle{
     id: thread
-    property alias replyState: reply.state
+    property alias replyState: reply
+    property alias artAddState: artAdd
     width: background.width
     height: background.height
     XmlListModel{
@@ -23,60 +25,7 @@ Rectangle{
 
     ThreadDel {
         id: thrdDel
-        Rectangle{
-            id: submit
-            width: replyRect.width/2.01
-            height: background.height - replyRect.height - 5
-            anchors.top: replyRect.bottom
-            anchors.topMargin: 5
-            anchors.right: replyRect.right
-            color: "darkgrey"
-            Text{
-                id: submitText
-                anchors.centerIn: parent
-                text: qsTr("Submit")
-            }
-            MouseArea{
-                id:submitMA
-                anchors.fill: parent
 
-                onClicked: {
-                    reply.state = "SUBMITCLICKED"
-
-                    client.sendPost(threadSource, "",replyText.text, userIcon)
-                    postModel.reload()
-
-                }
-
-            }
-        }
-        Rectangle{
-            id: cancel
-            width: background.width/2.01
-            height: background.height - replyRect.height - 5
-            anchors.top: replyRect.bottom
-            anchors.topMargin: 5
-            anchors.left: replyRect.left
-            color: "darkgrey"
-
-            Text{
-                id: cancelText
-                anchors.centerIn: parent
-                text: qsTr("Cancel")
-            }
-            MouseArea{
-                id:cancelMA
-                anchors.fill: parent
-                enabled: false
-                onClicked: {
-                    reply.state = "CANCELCLICKED"
-                    cancel.color = "lightGrey"
-
-                }
-
-            }
-
-        }
     }
     Rectangle{
         id: postBackground
@@ -90,8 +39,13 @@ Rectangle{
                 model: postModel
                 delegate: thrdDel
                 spacing: 2
+                onContentYChanged: if(contentY < -100){
+                                       client.update(threadSource)
+                                       postModel.reload()
+                                   }
 
             }
+
     }
     Rectangle{
         id: articleBack
@@ -132,11 +86,18 @@ Rectangle{
         orientation: ListView.Horizontal
         delegate: ArticleDel {}
         spacing: 5
-
+        onContentXChanged: if(contentX < -50 || contentX > contentWidth + 50){
+                               client.update(threadSource)
+                               artModel.reload()
+                           }
     }
     Reply{
         id: reply
         state: "REPLYNOTVISIBLE"
+    }
+    ArticleAdd{
+        id: artAdd
+        state: "ARTADDNOTVISIBLE"
     }
 
 }

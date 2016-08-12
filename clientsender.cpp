@@ -96,6 +96,7 @@ void clientSender::sendPost(QString fileName, QString articles, QString postText
     }else{
        qDebug() << "Socket not open";
     }
+    file.flush();
     file.close();
 }
 
@@ -104,11 +105,26 @@ void clientSender::addArticle(QString fileName, QString article)
     QDomDocument doc;
     currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
     QFile file(currentFileName);
-
+    file.open(QIODevice::ReadWrite);
     doc.setContent(&file);
+    file.resize(0);
+    QDomNode thrd = doc.firstChildElement("thread");
+    QDomElement header = doc.createElement("header");
+    header.appendChild(doc.createTextNode("article"));
+    thrd.appendChild(header);
     articleAdder(doc, article);
     QByteArray array = doc.toByteArray();
-    socket->write(array);
+    file.write(array);
+    qDebug() << doc.toString();
+    if(socket->isOpen()){
+        qDebug() << "Writing...";
+        socket->write(array);
+        qDebug() << "Done Writing";
+    }else{
+       qDebug() << "Socket not open";
+    }
+    file.flush();
+    file.close();
 }
 
 void clientSender::fairVote(QString fileName, QString article)
@@ -127,16 +143,17 @@ void clientSender::fairVote(QString fileName, QString article)
     header.appendChild(doc.createTextNode("fairChanged"));
     ele.appendChild(header);
     QDomElement articles = ele.firstChildElement("articles").toElement();
-    QDomNode articleTag = articles.firstChild();
-    do{
-        if(articleTag.firstChildElement("source").text() == article){
-            QDomElement fairTag = articleTag.firstChildElement("fair");
+    QDomNodeList articleTags = articles.elementsByTagName("article");
+    for(int i = 0; i < articleTags.size(); i++){
+        if(articleTags.at(i).firstChildElement("source").text() == article){
+            QDomElement fairTag = articleTags.at(i).firstChildElement("fair");
             int fairVal = fairTag.text().toInt();
             fairVal++;
+            qDebug() << "fairVal" << fairVal;
             fairTag.replaceChild(doc.createTextNode(QString::number(fairVal)), fairTag.firstChild());
+            break;
         }
-        articleTag = articleTag.nextSibling();
-    }while(articleTag.firstChildElement("source").text() != article && !articleTag.isNull());
+    }
     QByteArray array = doc.toByteArray();
     file.write(array);
     if(socket->isOpen()){
@@ -146,6 +163,7 @@ void clientSender::fairVote(QString fileName, QString article)
     }else{
        qDebug() << "Socket not open";
     }
+    file.flush();
     file.close();
 }
 
@@ -153,6 +171,7 @@ void clientSender::biasVote(QString fileName, QString article)
 {
     qDebug() << "Bias Vote";
     qDebug() << fileName;
+    qDebug() << "article" << article;
     currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
     QFile file(currentFileName);
     file.open(QIODevice::ReadWrite);
@@ -164,17 +183,19 @@ void clientSender::biasVote(QString fileName, QString article)
     header.appendChild(doc.createTextNode("biasChanged"));
     ele.appendChild(header);
     QDomElement articles = ele.firstChildElement("articles").toElement();
-    QDomNode articleTag = articles.firstChild();
-    do{
-        if(articleTag.firstChildElement("source").text() == article){
-            QDomElement biasTag = articleTag.firstChildElement("bias");
+    QDomNodeList articleTags = articles.elementsByTagName("article");
+    for(int i = 0; i < articleTags.size(); i++){
+        if(articleTags.at(i).firstChildElement("source").text() == article){
+            QDomElement biasTag = articleTags.at(i).firstChildElement("bias");
             int biasVal = biasTag.text().toInt();
             biasVal++;
+            qDebug() << "biasVal" << biasVal;
             biasTag.replaceChild(doc.createTextNode(QString::number(biasVal)), biasTag.firstChild());
+            break;
         }
-        articleTag = articleTag.nextSibling();
-    }while(articleTag.firstChildElement("source").text() != article && !articleTag.isNull());
+    }
     QByteArray array = doc.toByteArray();
+//    qDebug() << doc.toString();
     file.write(array);
     if(socket->isOpen()){
         qDebug() << "Writing...";
@@ -183,6 +204,7 @@ void clientSender::biasVote(QString fileName, QString article)
     }else{
        qDebug() << "Socket not open";
     }
+    file.flush();
     file.close();
 }
 
@@ -225,31 +247,49 @@ void clientSender::newThread(QString title, QString articles[], QString text, QS
 
 void clientSender::update(QString fileName)
 {
+    qDebug() << "update file";
     currentFileName = "/home/tory/Qtprojects/ForvmXMLFiles/" + fileName;
     QFile file(currentFileName);
-    qDebug() << "update file";
-    if(file.open(QIODevice::ReadWrite)){
-        socket->write(file.readAll());
+    file.open(QIODevice::ReadWrite);
+    QDomDocument doc;
+    doc.setContent(&file);
+    file.resize(0);
+    QDomNode ele = doc.firstChildElement("thread");
+    QDomElement header = doc.createElement("header");
+    header.appendChild(doc.createTextNode("update"));
+    ele.appendChild(header);
+    QByteArray array = doc.toByteArray();
+    file.write(array);
+    if(socket->isOpen()){
+        qDebug() << "Writing...";
+        socket->write(array);
+        qDebug() << "Done Writing";
     }else{
-        qDebug() << "file not open";
+       qDebug() << "Socket not open";
     }
+    file.flush();
     file.close();
 
 }
 
 void clientSender::articleAdder(QDomDocument doc, QString article)
 {
-    QDomElement ele = doc.firstChildElement("articles");
+    QDomElement thread = doc.firstChildElement("thread");
+    QDomElement articles = thread.firstChildElement("articles");
     QDomElement articleTag = doc.createElement("article");
     QDomElement source = doc.createElement("source");
     QDomElement fair = doc.createElement("fair");
     QDomElement bias = doc.createElement("bias");
-    source.appendChild(doc.createTextNode(article));
-    fair.appendChild(doc.createTextNode(0));
-    bias.appendChild(doc.createTextNode(0));
+    QString artString = article;
+    if(!artString.contains("http://")){
+        artString = "http://" + artString;
+    }
+    source.appendChild(doc.createTextNode(artString));
+    fair.appendChild(doc.createTextNode("0"));
+    bias.appendChild(doc.createTextNode("0"));
     articleTag.appendChild(source);
     articleTag.appendChild(fair);
     articleTag.appendChild(bias);
-    ele.appendChild(articleTag);
+    articles.appendChild(articleTag);
 }
 

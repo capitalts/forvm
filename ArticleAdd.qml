@@ -1,16 +1,17 @@
-import QtQuick 2.4
+import QtQuick 2.0
+
 Rectangle {
     property variant arts: [""]
-    id: replyRect
+    id: artAddRect
     width: background.width
-    height: background.height/1.1
+    height: background.height/8
     y: 0
     color: "darkgrey"
-    state: "REPLYNOTVISIBLE"
+    state: "ARTADDNOTVISIBLE"
 
     Text {
         id: postIn
-        text: qsTr("Post In " + threadTitle)
+        text: qsTr("Add Article To: " + threadTitle)
         font.pointSize: 15
         anchors.top: parent.top
         anchors.topMargin: 10
@@ -19,11 +20,11 @@ Rectangle {
 
     Rectangle{
         id: submit
-        width: replyRect.width/2.01
-        height: background.height - replyRect.height - 5
-        anchors.top: replyRect.bottom
-        anchors.topMargin: 5
-        anchors.right: replyRect.right
+        width: artAddRect.width/2.01
+        height:artAddRect.height/2
+        anchors.top: artAddRect.bottom
+        anchors.topMargin: 2
+        anchors.right: artAddRect.right
         color: "darkgrey"
         Text{
             id: submitText
@@ -35,10 +36,10 @@ Rectangle {
             anchors.fill: parent
 
             onClicked: {
-                if(replyText.text.length > 0){
-                    client.sendPost(threadSource, "",replyText.text, userIcon)
+                if(artAddText.text.length > 0){
+                    client.addArticle(threadSource, artAddText.text)
                 }
-                replyRect.state = "SUBMITCLICKED"
+                artAddRect.state = "SUBMITCLICKED"
             }
 
         }
@@ -46,10 +47,10 @@ Rectangle {
     Rectangle{
         id: cancel
         width: background.width/2.01
-        height: background.height - replyRect.height - 5
-        anchors.top: replyRect.bottom
-        anchors.topMargin: 5
-        anchors.left: replyRect.left
+        height: artAddRect.height/2
+        anchors.top: artAddRect.bottom
+        anchors.topMargin: 2
+        anchors.left: artAddRect.left
         color: "darkgrey"
 
         Text{
@@ -61,7 +62,7 @@ Rectangle {
             id:cancelMA
             anchors.fill: parent
             onClicked: {
-                replyRect.state = "CANCELCLICKED"
+                artAddRect.state = "CANCELCLICKED"
                 cancel.color = "lightGrey"
             }
 
@@ -69,35 +70,15 @@ Rectangle {
 
     }
     Rectangle{
-        id: replyTextRect
-        height: parent.height - postIn.height - 15
-        width: parent.width -5
+        id: artAddTextRect
+        height: parent.height/3
+        width: parent.width-5
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: postIn.bottom
         color: "lightgrey"
-        Flickable {
-             id: replyFlick
-             width: parent.width; height: parent.height;
-             anchors.fill: parent
-             flickableDirection: Flickable.VerticalFlick
-             contentWidth: parent.width
-             contentHeight: replyText.paintedHeight
-             clip: true
-             boundsBehavior: Flickable.StopAtBounds
 
-             function ensureVisible(r)
-             {
-                 if (contentX >= r.x)
-                     contentX = r.x;
-                 else if (contentX+ width <= r.x+r.width)
-                     contentX = r.x+r.width-width;
-                 if (contentY >= r.y)
-                     contentY = r.y;
-                 else if (contentY+height <= r.y+r.height)
-                     contentY = r.y+r.height-height;
-             }
             TextEdit{
-                id: replyText
+                id: artAddText
                 width: parent.width
                 height: parent.height
                 focus: true
@@ -108,19 +89,16 @@ Rectangle {
                     left: parent.left
                     leftMargin: 5
                 }
-                wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
-                onCursorRectangleChanged: replyFlick.ensureVisible(cursorRectangle)
             }
 
-        }
     }
 
     states:[
         State{
-            name: "REPLYVISIBLE"
+            name: "ARTADDVISIBLE"
             PropertyChanges {
-                target: replyRect
-                x: 0
+                target: artAddRect
+                y: 0
                 enabled: true
             }
             PropertyChanges {
@@ -134,15 +112,15 @@ Rectangle {
 
             }
             PropertyChanges {
-                target: replyText
+                target: artAddText
                 text: ""
             }
         },
         State{
-            name: "REPLYNOTVISIBLE"
+            name: "ARTADDNOTVISIBLE"
             PropertyChanges {
-                target: replyRect
-                x: root.width
+                target: artAddRect
+                y: -artAddRect.height - cancel.height-topBar.height
                 enabled: false
             }
 
@@ -150,8 +128,8 @@ Rectangle {
         State{
             name: "CANCELCLICKED"
             PropertyChanges {
-                target: replyRect
-                x: root.width
+                target: artAddRect
+                y: -artAddRect.height - cancel.height-topBar.height
                 enabled: false
             }
             PropertyChanges {
@@ -163,8 +141,8 @@ Rectangle {
         State{
             name: "SUBMITCLICKED"
             PropertyChanges {
-                target: replyRect
-                x: root.width
+                target: artAddRect
+                y: -artAddRect.height - cancel.height-topBar.height
                 enabled: false
             }
             PropertyChanges {
@@ -178,37 +156,37 @@ Rectangle {
 
     transitions: [
         Transition {
-            from: "REPLYVISIBLE"
+            from: "ARTADDVISIBLE"
             to: "SUBMITCLICKED"
             PropertyAnimation{
                 target: submit
                 property: "color"
-                duration: 150
+                duration: 50
             }
             PropertyAnimation{
-                target: replyRect
-                property: "x"
+                target: artAddRect
+                property: "y"
                 duration: 200
             }
 
 
         },
         Transition {
-            from: "REPLYVISIBLE"
+            from: "ARTADDVISIBLE"
             to: "CANCELCLICKED"
             PropertyAnimation{
                 target: cancel
                 property: "color"
-                duration: 150
+                duration: 50
             }
             PropertyAnimation{
-                target: replyRect
-                property: "x"
+                target: artAddRect
+                property: "y"
                 duration: 200
             }
         },
         Transition {
-            from: "REPLYVISIBLE"
+            from: "ARTADDVISIBLE"
             to: "SUBMITCLICKED"
             PropertyAnimation{
                 target: submit
@@ -216,48 +194,47 @@ Rectangle {
                 duration: 150
             }
             PropertyAnimation{
-                target: replyRect
-                property: "x"
+                target: artAddRect
+                property: "y"
                 duration: 200
             }
         },
             Transition {
-                from: "REPLYVISIBLE"
-                to: "REPLYNOTVISIBLE"
+                from: "ARTADDVISIBLE"
+                to: "ARTADDNOTVISIBLE"
                 PropertyAnimation{
-                    target: replyRect
-                    property: "x"
+                    target: artAddRect
+                    property: "y"
                     duration: 200
                 }
             },
             Transition {
                 from: "SUBMITCLICKED"
-                to: "REPLYVISIBLE"
+                to: "ARTADDVISIBLE"
                 PropertyAnimation{
-                    target: replyRect
-                    property: "x"
+                    target: artAddRect
+                    property: "y"
                     duration: 200
                 }
             },
         Transition {
             from: "CANCELCLICKED"
-            to: "REPLYVISIBLE"
+            to: "ARTADDVISIBLE"
             PropertyAnimation{
-                target: replyRect
-                property: "x"
+                target: artAddRect
+                property: "y"
                 duration: 200
             }
         },
         Transition {
-            from: "REPLYNOTVISIBLE"
-            to: "REPLYVISIBLE"
+            from: "ARTADDNOTVISIBLE"
+            to: "ARTADDVISIBLE"
             PropertyAnimation{
-                target: replyRect
-                property: "x"
+                target: artAddRect
+                property: "y"
                 duration: 200
             }
         }
     ]
 }
-
 
