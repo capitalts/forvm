@@ -5,35 +5,60 @@ Component{
     id: mainPageDel
     Rectangle{
         id: thread
-        width: threadGrid.cellWidth
-        height: threadGrid.cellHeight
-        color: "black"
+        width: threadGrid.cellWidth-4
+        height: threadGrid.cellHeight-4
+
+        color: "grey"
+        Text{
+            id: title
+            text: thrdTitle
+            anchors.bottom: thread.bottom
+            anchors.left: thread.left
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            color: "white"
+            font.pointSize: 20
+            width: thread.width
+        }
+
+//        Image{
+//            id: articleImage
+//            width: thread.width
+//            height: thread.height - title.height
+//            source: threadImg
+//            MouseArea{
+//                anchors.fill: parent
+//                onClicked:{
+//                    threadSource = threadSrc
+//                    client.update(threadSrc)
+//                    root.state = "THREAD"
+//                }
+//            }
+
+//        }
+        Flickable{
+            id:imageFlick
+            anchors.fill: parent
+            contentWidth: parent.width
+            contentHeight: parent.height+title.height
             Image{
                 id: articleImage
-                anchors.centerIn: parent
-                height: parent.height/1.03
-                width: parent.width/1.02
+                width: thread.width
+                height: thread.height
                 source: threadImg
-            }
-            Text{
-                id: title
-                text: thrdTitle
-                anchors.bottom: articleImage.bottom
-                anchors.left: parent.left
-                wrapMode: Text.WordWrap
-                color: "black"
-                font.pointSize: postFontSize
-                width:articleImage.width
-            }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    threadSource = threadSrc
-                    root.state = "THREAD"
-                    threadTitle = thrdTitle
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:{
+                        threadSource = threadSrc
+                        client.update(threadSrc)
+                        root.state = "THREAD"
+                    }
                 }
             }
+            flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+
         }
+    }
 
 }
 

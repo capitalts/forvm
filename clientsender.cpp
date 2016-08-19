@@ -44,15 +44,28 @@ void clientSender::readyToRead()
 {
     qDebug() << "reading...";
     QByteArray data = socket->readAll();
-    QDomDocument doc;
-    doc.setContent(data);
-    QDomElement thread = doc.firstChildElement("thread");
-    QString filename = thread.firstChildElement("fileName").text();
-    QFile file("/home/tory/Qtprojects/ForvmXMLFiles/" + filename);
+    QDomDocument serverDoc;
+    serverDoc.setContent(data);
+    QDomElement thread = serverDoc.firstChildElement("threads");
+    if(serverDoc.firstChildElement("threads").isNull()){
+        thread = serverDoc.firstChildElement("thread");
+    }
+    QString fileName = thread.firstChildElement("fileName").text();
+    QFile file("/home/tory/Qtprojects/ForvmXMLFiles/" + fileName);
+    file.open(QIODevice::ReadWrite);
+    if(fileName != "MainThreads.xml"){
+        QDomDocument clientDoc;
+        clientDoc.setContent(&file);
+        QDomNodeList clientArticles = clientDoc.firstChildElement("thread").firstChildElement("articles").elementsByTagName("article");
+        QDomNodeList serverArticles = thread.firstChildElement("articles").elementsByTagName("article");
+        for(int i = 0; i < clientArticles.size(); i++){
+            serverArticles.at(i).appendChild(clientArticles.at(i).firstChildElement("enabled"));
+        }
+    }
     file.resize(0);
-    if(file.open(QIODevice::WriteOnly)){
+    if(file.isOpen()){
     // read the data from the socket
-        file.write(data);
+        file.write(serverDoc.toByteArray());
     }else{
         qDebug() << "file not open";
     }
@@ -85,7 +98,7 @@ void clientSender::sendPost(QString fileName, QString articles, QString postText
     post.appendChild(postIcon);
     post.appendChild(postTextEle);
     posts.appendChild(post);
-    ele.appendChild(header);
+    ele.insertBefore(header, ele.firstChildElement("header"));
 
     QByteArray array = doc.toByteArray();
 
@@ -111,7 +124,7 @@ void clientSender::addArticle(QString fileName, QString article)
     QDomNode thrd = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("article"));
-    thrd.appendChild(header);
+    thrd.insertBefore(header, thrd.firstChildElement("header"));
     articleAdder(doc, article);
     QByteArray array = doc.toByteArray();
     file.write(array);
@@ -141,16 +154,18 @@ void clientSender::fairVote(QString fileName, QString article)
     QDomNode ele = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("fairChanged"));
-    ele.appendChild(header);
+    ele.insertBefore(header, ele.firstChildElement("header"));
     QDomElement articles = ele.firstChildElement("articles").toElement();
     QDomNodeList articleTags = articles.elementsByTagName("article");
     for(int i = 0; i < articleTags.size(); i++){
         if(articleTags.at(i).firstChildElement("source").text() == article){
             QDomElement fairTag = articleTags.at(i).firstChildElement("fair");
+            QDomElement enabledTag = articleTags.at(i).firstChildElement("enabled");
             int fairVal = fairTag.text().toInt();
             fairVal++;
             qDebug() << "fairVal" << fairVal;
             fairTag.replaceChild(doc.createTextNode(QString::number(fairVal)), fairTag.firstChild());
+            enabledTag.replaceChild(doc.createTextNode("false"), enabledTag.firstChild());
             break;
         }
     }
@@ -181,16 +196,18 @@ void clientSender::biasVote(QString fileName, QString article)
     QDomNode ele = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("biasChanged"));
-    ele.appendChild(header);
+    ele.insertBefore(header, ele.firstChildElement("header"));
     QDomElement articles = ele.firstChildElement("articles").toElement();
     QDomNodeList articleTags = articles.elementsByTagName("article");
     for(int i = 0; i < articleTags.size(); i++){
         if(articleTags.at(i).firstChildElement("source").text() == article){
             QDomElement biasTag = articleTags.at(i).firstChildElement("bias");
+            QDomElement enabledTag = articleTags.at(i).firstChildElement("enabled");
             int biasVal = biasTag.text().toInt();
             biasVal++;
             qDebug() << "biasVal" << biasVal;
             biasTag.replaceChild(doc.createTextNode(QString::number(biasVal)), biasTag.firstChild());
+            enabledTag.replaceChild(doc.createTextNode("false"), enabledTag.firstChild());
             break;
         }
     }
@@ -209,39 +226,50 @@ void clientSender::biasVote(QString fileName, QString article)
 }
 
 
-void clientSender::newThread(QString title, QString articles[], QString text, QString icon)
+void clientSender::newThread(QString title, QString article, QString text, QString icon, QString fileName)
 {
-    time_t now = time(0);
+    QFile file("/home/tory/Qtprojects/ForvmXMLFiles/" + fileName);
+    file.open(QIODevice::ReadWrite);
+
     QDomDocument doc;
-    QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\"");
+    QDomProcessingInstruction procInst = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
     doc.appendChild(procInst);
     QDomElement root = doc.createElement("fileName");
-    root.appendChild(doc.createTextNode(title + now + ".xml"));
+    root.appendChild(doc.createTextNode(fileName));
     QDomElement header = doc.createElement("header");
-    header.appendChild(doc.createTextNode("newThread"));
+    header.appendChild(doc.createTextNode("New Thread"));
     QDomElement thread = doc.createElement("thread");
     QDomElement head = doc.createElement("head");
     head.appendChild(doc.createTextNode(title));
-    QDomElement arts = doc.createElement("articles");
-    if(sizeof(articles) > 0){
-        for(int i = 0; i < sizeof(articles); i++){
-                articleAdder(doc, articles[i]);
-        }
-    }
-
-    QDomElement posts = doc.createElement("posts");
-    QDomElement post = doc.createElement("postText");
-    QDomElement postIcon = doc.createElement("icon");
-    post.appendChild(doc.createTextNode(text));
-    postIcon.appendChild(doc.createTextNode(icon));
-    posts.appendChild(post);
+    thread.appendChild(header);
     thread.appendChild(root);
     thread.appendChild(head);
-    thread.appendChild(arts);
+    doc.appendChild(thread);
+    qDebug() << article;
+    if(!article.isEmpty()){
+          articleAdder(doc, article);
+    }
+    QDomElement posts = doc.createElement("posts");
+    QDomElement post = doc.createElement("post");
+    QDomElement postText = doc.createElement("postText");
+    QDomElement postIcon = doc.createElement("icon");
+    postText.appendChild(doc.createTextNode(text));
+    postIcon.appendChild(doc.createTextNode(icon));
+    post.appendChild(postIcon);
+    post.appendChild(postText);
+    posts.appendChild(post);
     thread.appendChild(posts);
-    root.appendChild(thread);
+    qDebug() << doc.toString();
     QByteArray array = doc.toByteArray();
-    socket->write(array);
+    if(socket->isOpen()){
+        qDebug() << "Writing...";
+        socket->write(array);
+        qDebug() << "Done Writing";
+    }else{
+       qDebug() << "Socket not open";
+    }
+    file.close();
+    file.flush();
 
 }
 
@@ -257,7 +285,7 @@ void clientSender::update(QString fileName)
     QDomNode ele = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("update"));
-    ele.appendChild(header);
+    ele.insertBefore(header, ele.firstChildElement("header"));
     QByteArray array = doc.toByteArray();
     file.write(array);
     if(socket->isOpen()){
@@ -276,10 +304,15 @@ void clientSender::articleAdder(QDomDocument doc, QString article)
 {
     QDomElement thread = doc.firstChildElement("thread");
     QDomElement articles = thread.firstChildElement("articles");
+    if(thread.firstChildElement("articles").isNull()){
+        articles = doc.createElement("articles");
+        thread.appendChild(articles);
+    }
     QDomElement articleTag = doc.createElement("article");
     QDomElement source = doc.createElement("source");
     QDomElement fair = doc.createElement("fair");
     QDomElement bias = doc.createElement("bias");
+    QDomElement enabled = doc.createElement("enabled");
     QString artString = article;
     if(!artString.contains("http://")){
         artString = "http://" + artString;
@@ -287,6 +320,8 @@ void clientSender::articleAdder(QDomDocument doc, QString article)
     source.appendChild(doc.createTextNode(artString));
     fair.appendChild(doc.createTextNode("0"));
     bias.appendChild(doc.createTextNode("0"));
+    enabled.appendChild(doc.createTextNode("true"));
+    articleTag.appendChild(enabled);
     articleTag.appendChild(source);
     articleTag.appendChild(fair);
     articleTag.appendChild(bias);

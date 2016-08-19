@@ -41,6 +41,7 @@ Rectangle{
         onClicked: {
             root.state = "MAIN"
             setBar.state = "SETNOTVISIBLE"
+            newThrd.state = "NEWTHREADNOTVISIBLE"
         }
     }
 }

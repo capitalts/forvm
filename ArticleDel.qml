@@ -2,33 +2,44 @@ import QtQuick 2.4
 Component{
     Rectangle{
         id: article
+        color: "grey"
         width: articleBack.width/3
         height: articleBack.height/1.05
         anchors.verticalCenter: parent.verticalCenter
-
-        Image{
-            id: articleImage
-            anchors.fill: parent
-            source: artImg
-        }
         Text{
             text: artTitle
             anchors.top: parent.top
             width: parent.width
             wrapMode: Text.WordWrap
             font.pointSize: 12
+            color: "white"
         }
-        MouseArea{
+        Flickable{
+            id:imageFlick
             anchors.fill: parent
-            onClicked:{
-                web.openWebPage(artSource)
+            contentWidth: parent.width
+            contentHeight: parent.height*2
+            Image{
+                id: articleImage
+                width: imageFlick.width
+                height: imageFlick.height
+                source: artImg
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:{
+                        web.openWebPage(artSource)
+                    }
+                }
             }
+            flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+
         }
         Rectangle{
             id: biases
-            color:"orange"
-            width: article.width/4.5 - fair/10
-            height: article.height/4.5 - fair/10
+            color:"tomato"
+            width: article.width/4.5
+            height: article.height/4.5
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 2
             anchors.right: parent.right
@@ -43,20 +54,19 @@ Component{
                 id: biasClick
                 anchors.fill: parent
                 onClicked:{
-                    console.log("artSource " + artSource)
-                    client.biasVote(threadSource, artSource)
-                    artModel.reload()
+                    if(voteEnabled == "true"){
+                        client.fairVote(threadSource, artSource)
+                        artModel.reload()
+                    }
 
-                    biasClick.visible = false
-                    fairClick.visible = false
                 }
             }
         }
         Rectangle{
             id: fairs
-            color: "purple"
-            width: parent.width/4.5 - bias/10
-            height: parent.height/4.5 - bias/10
+            color: "palegreen"
+            width: parent.width/4.5
+            height: parent.height/4.5
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 2
             anchors.right: biases.left
@@ -70,10 +80,13 @@ Component{
                 id: fairClick
                 anchors.fill: parent
                 onClicked: {
-                    client.fairVote(threadSource, artSource)
-                    artModel.reload()
-                    biasClick.visible = false
-                    fairClick.visible = false
+                    if(voteEnabled == "true"){
+                        client.fairVote(threadSource, artSource)
+                        artModel.reload()
+                    }
+
+
+
                 }
             }
         }

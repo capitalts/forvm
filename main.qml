@@ -46,7 +46,8 @@ ApplicationWindow{
 
         Rectangle{
             id: background
-            y:topBar.height
+            y:topBar.height + 2
+            x:2
             width: root.width
             height: root.height - topBar.height
             color: "black"
@@ -57,7 +58,10 @@ ApplicationWindow{
                 anchors.fill: parent
                 model: mainModel
                 delegate: MainPageDel {}
-
+                onDragEnded: if(contentY < -100){
+                                 client.update("MainThreads.xml")
+                                 mainModel.reload()
+                             }
             }
     }
         Thread{
@@ -86,6 +90,11 @@ ApplicationWindow{
             id: edIc
             visible: false
         }
+        NewThread{
+            id:newThrd
+            state: "NEWTHREADNOTVISIBLE"
+        }
+
         states: [
             State{
                 name:"MAIN"
@@ -113,6 +122,11 @@ ApplicationWindow{
                 PropertyChanges {
                     target: thread.replyState
                     state: "REPLYNOTVISIBLE"
+
+                }
+                PropertyChanges {
+                    target: newThrd
+                    state: "NEWTHREADNOTVISIBLE"
 
                 }
             },

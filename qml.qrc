@@ -15,5 +15,6 @@
         <file>Thread.qml</file>
         <file>Reply.qml</file>
         <file>ArticleAdd.qml</file>
+        <file>NewThread.qml</file>
     </qresource>
 </RCC>

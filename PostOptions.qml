@@ -42,6 +42,7 @@ Rectangle{
                         postOptionsRect.state = "POSTOPNOTVISIBLE"
                         if(name === "Reply"){
                         reply.state = "REPLYVISIBLE"
+                        reply.repText.text = ">>" + postNumber
                         }
                     }
                 }

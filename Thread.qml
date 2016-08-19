@@ -39,7 +39,7 @@ Rectangle{
                 model: postModel
                 delegate: thrdDel
                 spacing: 2
-                onContentYChanged: if(contentY < -100){
+                onDragEnded: if(contentY < -100){
                                        client.update(threadSource)
                                        postModel.reload()
                                    }
@@ -74,6 +74,9 @@ Rectangle{
             XmlRole{
                 name: "fair"; query: "fair/number()"
             }
+            XmlRole{
+                name: "voteEnabled"; query: "enabled/string()"
+            }
     }
 
 
@@ -86,7 +89,7 @@ Rectangle{
         orientation: ListView.Horizontal
         delegate: ArticleDel {}
         spacing: 5
-        onContentXChanged: if(contentX < -50 || contentX > contentWidth + 50){
+        onDragEnded: if(contentX < -100 || contentX > contentWidth + 100){
                                client.update(threadSource)
                                artModel.reload()
                            }

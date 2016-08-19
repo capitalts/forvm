@@ -15,7 +15,7 @@ Rectangle {
         }
         ListElement{
             name: "New Thread"
-            sig: "REPLYVISIBLE"
+            sig: "NEWTHREADVISIBLE"
         }
         ListElement{
             name: "Help"
@@ -68,6 +68,8 @@ Rectangle {
                                 thread.replyState.state = sig
                            } else if(name == "Add Article"){
                                 thread.artAddState.state = sig
+                           }else if(name == "New Thread"){
+                                 newThrd.state = sig
                            }
                          }
             }

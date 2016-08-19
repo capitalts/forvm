@@ -1,13 +1,15 @@
-import QtQuick 2.4
+import QtQuick 2.5
 Rectangle {
     property variant arts: [""]
+    property alias repText: replyText
     id: replyRect
     width: background.width
     height: background.height/1.1
-    y: 0
     color: "darkgrey"
     state: "REPLYNOTVISIBLE"
-
+    MouseArea{
+        id: replyMA
+        anchors.fill: parent
     Text {
         id: postIn
         text: qsTr("Post In " + threadTitle)
@@ -19,11 +21,11 @@ Rectangle {
 
     Rectangle{
         id: submit
-        width: replyRect.width/2.01
-        height: background.height - replyRect.height - 5
-        anchors.top: replyRect.bottom
+        width: reply.width/2.01
+        height: background.height - replyMA.height - 5
+        anchors.top: replyMA.bottom
         anchors.topMargin: 5
-        anchors.right: replyRect.right
+        anchors.right: replyMA.right
         color: "darkgrey"
         Text{
             id: submitText
@@ -39,6 +41,7 @@ Rectangle {
                     client.sendPost(threadSource, "",replyText.text, userIcon)
                 }
                 replyRect.state = "SUBMITCLICKED"
+
             }
 
         }
@@ -47,9 +50,9 @@ Rectangle {
         id: cancel
         width: background.width/2.01
         height: background.height - replyRect.height - 5
-        anchors.top: replyRect.bottom
+        anchors.top: replyMA.bottom
         anchors.topMargin: 5
-        anchors.left: replyRect.left
+        anchors.left: replyMA.left
         color: "darkgrey"
 
         Text{
@@ -114,7 +117,7 @@ Rectangle {
 
         }
     }
-
+}
     states:[
         State{
             name: "REPLYVISIBLE"
