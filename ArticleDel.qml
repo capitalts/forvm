@@ -55,8 +55,9 @@ Component{
                 anchors.fill: parent
                 onClicked:{
                     if(voteEnabled == "true"){
-                        client.fairVote(threadSource, artSource)
+                        client.biasVote(threadSource, artSource)
                         artModel.reload()
+
                     }
 
                 }

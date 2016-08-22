@@ -5,11 +5,13 @@ Rectangle{
     id: thread
     property alias replyState: reply
     property alias artAddState: artAdd
+    property alias postMod: postModel
+    property alias artMod: artModel
     width: background.width
     height: background.height
     XmlListModel{
         id: postModel
-        source: "file:///home/tory/Qtprojects/ForvmXMLFiles/" + threadSource
+        source: "file:///" + client.getAppPath() + "/" + threadSource
         query: "/thread/posts/post"
 
         XmlRole{
@@ -57,7 +59,7 @@ Rectangle{
 
     XmlListModel{
         id: artModel
-        source: "file:///home/tory/Qtprojects/ForvmXMLFiles/" + threadSource
+        source: "file:///" + client.getAppPath() + "/" + threadSource
         query: "/thread/articles/article"
             XmlRole{
                 name: "artTitle"; query: "title/string()"

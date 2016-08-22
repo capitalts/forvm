@@ -1,5 +1,4 @@
 import QtQuick 2.4
-import Qt.WebSockets 1.0
 Rectangle {
     id: editIcon
     anchors.fill: parent

@@ -14,6 +14,8 @@ ApplicationWindow{
         "liberal": ":/../../Pictures/DemocraticLogo.png"};
     property string articleUrl: ""
     property string threadTitle: ""
+    property bool threadClicked: false
+    property alias mainMod: mainModel
 
     Rectangle{
         id: root
@@ -21,6 +23,7 @@ ApplicationWindow{
         visible: true
         color: "black"
         state: "MAIN"
+
         MouseArea{
             anchors.fill: parent
             onClicked: setBar.state = "SETNOTVISIBLE"
@@ -28,7 +31,7 @@ ApplicationWindow{
 
         XmlListModel{
             id: mainModel
-            source: "file:///home/tory/Qtprojects/ForvmXMLFiles/MainThreads.xml"
+            source: "file:///" + client.getAppPath() + "/MainThreads.xml";
             query: "/threads/thread"
 
             XmlRole{
@@ -42,12 +45,21 @@ ApplicationWindow{
             }
 
         }
-
+        Connections{
+            target: client
+            onFinishedReading:{
+                if(threadClicked || newThrd.state == "SUBMITCLICKED"){
+                    thread.postMod.reload()
+                    thread.artMod.reload()
+                    root.state = "THREAD"
+                    threadClicked = false
+                }
+            }
+        }
 
         Rectangle{
             id: background
             y:topBar.height + 2
-            x:2
             width: root.width
             height: root.height - topBar.height
             color: "black"
@@ -114,6 +126,7 @@ ApplicationWindow{
                 PropertyChanges {
                     target: thread
                     x: root.width
+                    enabled: false
                 }
                 PropertyChanges {
                     target: sets
@@ -150,7 +163,13 @@ ApplicationWindow{
                     state: "REPLYNOTVISIBLE"
 
                 }
+                PropertyChanges {
+                    target: newThrd
+                    state: "NEWTHREADNOTVISIBLE"
+
+                }
             },
+
             State{
                 name: "SETTINGS"
 

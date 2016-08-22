@@ -43,6 +43,14 @@ Rectangle {
         }
     }
 
+    MouseArea{
+        id: outsideMA
+        width: root.width
+        height: root.height
+        x:root.x
+        onClicked: settingsBar.state = "SETNOTVISIBLE"
+    }
+
     Component{
         id: settingsBarDel
         Rectangle{
@@ -75,7 +83,6 @@ Rectangle {
             }
         }
     }
-
     Column{
         id: settingsBarList
         anchors.fill: parent

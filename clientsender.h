@@ -17,6 +17,7 @@ class clientSender : public QObject
 private:
     QTcpSocket* socket;
     QString currentFileName;
+    QDir appDir;
     void articleAdder(QDomDocument file, QString article);
 
 public:
@@ -27,9 +28,10 @@ public:
     Q_INVOKABLE void biasVote(QString file, QString article);
     Q_INVOKABLE void newThread(QString title, QString article, QString text, QString icon, QString fileName);
     Q_INVOKABLE void update(QString fileName);
+    Q_INVOKABLE QString getAppPath();
     void doConnect();
 signals:
-
+    void finishedReading();
 public slots:
     void connected();
     void disconnected();

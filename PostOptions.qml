@@ -20,6 +20,13 @@ Rectangle{
         }
     }
 
+    MouseArea{
+        id: outsideMA
+        width: root.width
+        height: root.height
+        x: root.x
+        onClicked: postOptionsRect.state = "POSTOPNOTVISIBLE"
+    }
     Component{
         id: postOptionsDel
             Rectangle{
@@ -48,6 +55,7 @@ Rectangle{
                 }
         }
     }
+
         Row{
             id: postOptionsList
             anchors.fill: parent

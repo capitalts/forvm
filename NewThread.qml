@@ -163,7 +163,6 @@ Rectangle {
                         client.newThread(titleTextEdit.text, artAddText.text, replyText.text, userIcon, threadSource)
                         client.update(threadSource)
                         newThreadRect.state = "SUBMITCLICKED"
-                        root.state = "THREAD"
                     }
                 }
 
