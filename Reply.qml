@@ -1,4 +1,7 @@
 import QtQuick 2.5
+import QuickAndroid 0.1
+import QuickAndroid.Styles 0.1
+import QtQuick.Controls 2.0
 Rectangle {
     property variant arts: [""]
     property alias repText: replyText
@@ -18,6 +21,8 @@ Rectangle {
         anchors.topMargin: 10
         anchors.horizontalCenter: parent.horizontalCenter
     }
+
+
 
     Rectangle{
         id: submit
@@ -99,10 +104,10 @@ Rectangle {
                  else if (contentY+height <= r.y+r.height)
                      contentY = r.y+r.height-height;
              }
-            TextEdit{
+            TextArea{
                 id: replyText
                 width: parent.width
-                height: parent.height
+                height: parent.height + postFontSize
                 focus: true
                 font.pointSize: postFontSize
                 anchors{
@@ -111,7 +116,7 @@ Rectangle {
                     left: parent.left
                     leftMargin: 5
                 }
-                wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 onCursorRectangleChanged: replyFlick.ensureVisible(cursorRectangle)
             }
 

@@ -39,11 +39,9 @@ Rectangle{
         width: settingsColumn.width
         height: settingsColumn.height
         onClicked: {
-            client.update("MainThreads.xml")
             root.state = "MAIN"
             setBar.state = "SETNOTVISIBLE"
             newThrd.state = "NEWTHREADNOTVISIBLE"
-            mainModel.reload()
         }
     }
 }

@@ -1,4 +1,7 @@
 import QtQuick 2.4
+import QuickAndroid 0.1
+import QuickAndroid.Styles 0.1
+import QtQuick.Controls 2.0 as Control
 Rectangle {
     id: newThreadRect
     width: background.width
@@ -11,83 +14,76 @@ Rectangle {
         id: newThreadMA
         anchors.fill: parent
         Text {
-            id: makeNewThread
-            text: qsTr("New Thread")
-            font.pointSize: 15
-            anchors.top: parent.top
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-        Text {
             id: titleText
             text: qsTr("Title")
-            font.pointSize: 15
-            anchors.top: makeNewThread.bottom
+            font.pixelSize: 30
+            anchors.top: parent.top
             anchors.topMargin: 10
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Rectangle{
             id: titleTextRect
-            height: titleText.height
+            height: titleText.height*1.5
             width: parent.width-5
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: titleText.bottom
             color: "lightgrey"
-            TextEdit{
+            TextField{
                 id: titleTextEdit
                 width: parent.width
                 height: parent.height
                 focus: true
                 clip: true
-                font.pointSize: postFontSize
+                font.pointSize: 20
                 anchors{
                     right: parent.right
                     rightMargin: 7
                     left: parent.left
                     leftMargin: 5
                 }
-                wrapMode: TextEdit.NoWrap
 
             }
 
         }
+
         Text {
             id: artText
-            text: qsTr("Articles")
-            font.pointSize: 15
+            text: qsTr("Article")
+            font.pixelSize: 30
             anchors.top: titleTextRect.bottom
             anchors.topMargin: 10
             anchors.horizontalCenter: parent.horizontalCenter
         }
+
         Rectangle{
             id: artAddTextRect
-            height: artText.height
-            width: parent.width-5
+            height: artText.height*1.5
+            width: parent.width - 5
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: artText.bottom
             color: "lightgrey"
 
-                TextEdit{
+                TextField{
                     id: artAddText
                     width: parent.width
                     height: parent.height
                     clip: true
-                    font.pointSize: postFontSize
+                    font.pixelSize: 20
                     anchors{
-                        right: parent.right
-                        rightMargin: 7
                         left: parent.left
                         leftMargin: 5
                     }
                     selectByMouse: true
 
+
                 }
 
         }
+
         Text {
             id: postText
             text: qsTr("Post")
-            font.pointSize: 15
+            font.pixelSize: 30
             anchors.top: artAddTextRect.bottom
             anchors.topMargin: 10
             anchors.horizontalCenter: parent.horizontalCenter
@@ -122,20 +118,19 @@ Rectangle {
                      else if (contentY+height <= r.y+r.height)
                          contentY = r.y+r.height-height;
                  }
-                TextEdit{
+               Control.TextArea{
                     id: replyText
                     width: parent.width
-                    height: parent.height
+                    height: parent.height + font.pixelSize
                     focus: true
-                    font.pointSize: postFontSize
+                    font.pixelSize: 20
                     anchors{
                         right: parent.right
-                        rightMargin: 7
                         left: parent.left
-                        leftMargin: 5
                     }
-                    wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
+                    wrapMode: Control.TextArea.WrapAtWordBoundaryOrAnywhere
                     onCursorRectangleChanged: replyFlick.ensureVisible(cursorRectangle)
+                    selectByMouse: true
                 }
 
             }
@@ -161,7 +156,6 @@ Rectangle {
                     if(replyText.text.length > 0){
                         threadSource = titleTextEdit.text + Date() + ".xml"
                         client.newThread(titleTextEdit.text, artAddText.text, replyText.text, userIcon, threadSource)
-                        client.update(threadSource)
                         newThreadRect.state = "SUBMITCLICKED"
                     }
                 }

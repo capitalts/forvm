@@ -15,7 +15,9 @@ void clientSender::doConnect()
     qDebug() << "connecting...";
 
     // this is not blocking call
-    socket->connectToHost("127.0.0.1", 1234);
+
+//    socket->connectToHost("75.118.98.81", 8080);
+    socket->connectToHost("127.0.0.1", 8080);
 
     // we need to wait...
     if(!socket->waitForConnected(5000))
@@ -32,6 +34,7 @@ void clientSender::connected()
 
 void clientSender::disconnected()
 {
+
     qDebug() << "disconnected...";
 }
 
@@ -43,6 +46,7 @@ void clientSender::bytesWritten(qint64 bytes)
 void clientSender::readyToRead()
 {
     qDebug() << "reading...";
+
     QByteArray data = socket->readAll();
     QDomDocument serverDoc;
     serverDoc.setContent(data);
@@ -51,8 +55,33 @@ void clientSender::readyToRead()
         thread = serverDoc.firstChildElement("thread");
     }
     QString fileName = thread.firstChildElement("fileName").text();
-    QFile file(appDir.path() + "/" + fileName);
+    QFile file(appDir.absoluteFilePath(fileName));
     file.open(QIODevice::ReadWrite);
+    qDebug() << file.exists();
+    if(onStart){
+        QDir fileDir;
+        fileDir.setPath(appDir.absolutePath());
+        QStringList filters;
+        filters.append("*.xml");
+        QFileInfoList fileList = fileDir.entryInfoList(filters);
+        QDomNodeList fileNodes = serverDoc.firstChildElement("threads").childNodes();
+        QFileInfo fileInfo;
+        for(int i = 0; i < fileList.size(); i++){
+            bool fileFound = false;
+            for(int j = 0; j < fileNodes.size(); j++){
+                fileInfo.setFile(fileDir, fileNodes.at(j).firstChildElement("source").text());
+                if(fileInfo == fileList.at(i) || fileList.at(i).fileName() == "MainThreads.xml"){
+                    fileFound = true;
+                    break;
+                }
+            }
+            if(!fileFound){
+                qDebug() << "file to be removed" << fileList.at(i).fileName();
+                fileDir.remove(fileList.at(i).fileName());
+            }
+        }
+        onStart = false;
+    }
     if(fileName != "MainThreads.xml"){
         QDomDocument clientDoc;
         clientDoc.setContent(&file);
@@ -76,10 +105,24 @@ void clientSender::readyToRead()
 
 }
 
+
+void clientSender::closing(){
+    QFile file(appDir.absoluteFilePath("MainThreads.xml"));
+    file.open(QFile::ReadWrite);
+    QDomDocument doc;
+    doc.setContent(&file);
+    QDomNodeList threads = doc.firstChildElement("threads").elementsByTagName("thread");
+    for(int i = 0; i< threads.size(); i++){
+        QFile threadFile(appDir.absoluteFilePath(threads.at(i).firstChildElement("source").text()));
+        threadFile.remove();
+
+    }
+    file.remove();
+}
+
 void clientSender::sendPost(QString fileName, QString articles, QString postText, QString icon)
 {
-    currentFileName = appDir.path() + "/" + fileName;
-    QFile file(currentFileName);
+    QFile file(appDir.absoluteFilePath(fileName));
     QDomDocument doc;
     file.open(QIODevice::ReadWrite);
     doc.setContent(&file);
@@ -101,7 +144,11 @@ void clientSender::sendPost(QString fileName, QString articles, QString postText
     post.appendChild(postIcon);
     post.appendChild(postTextEle);
     posts.appendChild(post);
-    ele.insertBefore(header, ele.firstChildElement("header"));
+    if(!ele.firstChildElement("header").isNull()){
+        ele.insertBefore(header, ele.firstChildElement("header"));
+    }else{
+        ele.appendChild(header);
+    }
 
     QByteArray array = doc.toByteArray();
 
@@ -119,15 +166,19 @@ void clientSender::sendPost(QString fileName, QString articles, QString postText
 void clientSender::addArticle(QString fileName, QString article)
 {
     QDomDocument doc;
-    currentFileName = appDir.path() + "/" + fileName;
-    QFile file(currentFileName);
+    QFile file(appDir.absoluteFilePath(fileName));
     file.open(QIODevice::ReadWrite);
     doc.setContent(&file);
     file.resize(0);
     QDomNode thrd = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("article"));
-    thrd.insertBefore(header, thrd.firstChildElement("header"));
+    if(!thrd.firstChildElement("header").isNull()){
+        thrd.insertBefore(header, thrd.firstChildElement("header"));
+    }else{
+        thrd.appendChild(header);
+    }
+
     articleAdder(doc, article);
     QByteArray array = doc.toByteArray();
     file.write(array);
@@ -146,10 +197,7 @@ void clientSender::addArticle(QString fileName, QString article)
 void clientSender::fairVote(QString fileName, QString article)
 {
     qDebug() << "fairChanged";
-    currentFileName = appDir.path() + "/" + fileName;
-
-    qDebug() << currentFileName;
-    QFile file(currentFileName);
+    QFile file(appDir.absoluteFilePath(fileName));
     QDomDocument doc;
     file.open(QIODevice::ReadWrite);
     doc.setContent(&file);
@@ -157,7 +205,12 @@ void clientSender::fairVote(QString fileName, QString article)
     QDomNode ele = doc.firstChildElement("thread");
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("fairChanged"));
-    ele.insertBefore(header, ele.firstChildElement("header"));
+    if(!ele.firstChildElement("header").isNull()){
+        ele.insertBefore(header, ele.firstChildElement("header"));
+    }else{
+        ele.appendChild(header);
+    }
+
     QDomElement articles = ele.firstChildElement("articles").toElement();
     QDomNodeList articleTags = articles.elementsByTagName("article");
     for(int i = 0; i < articleTags.size(); i++){
@@ -190,8 +243,7 @@ void clientSender::biasVote(QString fileName, QString article)
     qDebug() << "Bias Vote";
     qDebug() << fileName;
     qDebug() << "article" << article;
-    currentFileName = appDir.path() + "/" + fileName;
-    QFile file(currentFileName);
+    QFile file(appDir.absoluteFilePath(fileName));
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
     doc.setContent(&file);
@@ -216,7 +268,6 @@ void clientSender::biasVote(QString fileName, QString article)
         }
     }
     QByteArray array = doc.toByteArray();
-//    qDebug() << doc.toString();
     file.write(array);
     if(socket->isOpen()){
         qDebug() << "Writing...";
@@ -232,7 +283,8 @@ void clientSender::biasVote(QString fileName, QString article)
 
 void clientSender::newThread(QString title, QString article, QString text, QString icon, QString fileName)
 {
-    QFile file(appDir.path() + "/" + fileName);
+    qDebug() << "New Thread";
+    QFile file(appDir.absoluteFilePath(fileName));
     file.open(QIODevice::ReadWrite);
 
     QDomDocument doc;
@@ -280,15 +332,9 @@ void clientSender::newThread(QString title, QString article, QString text, QStri
 
 void clientSender::update(QString fileName)
 {
-    qDebug() << "update file";
-    appDir.setPath(QCoreApplication::applicationDirPath());
-    if(!appDir.exists("ForvmXMLFiles")){
-        appDir.mkdir("ForvmXMLFiles");
-    }
-    appDir.setPath(QCoreApplication::applicationDirPath() + "/ForvmXMLFiles");
-    qDebug() << appDir.path();
-    currentFileName = appDir.path() + "/" + fileName;
-    QFile file(currentFileName);
+
+    QFile file(appDir.absoluteFilePath(fileName));
+    qDebug() << "update:" << fileName;
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
     doc.setContent(&file);
@@ -300,9 +346,9 @@ void clientSender::update(QString fileName)
         QDomElement thread = doc.createElement("thread");
         QDomElement head = doc.createElement("title");
 
-        QString mainThreadName = appDir.path() + "/MainThreads.xml";
-        QFile mainThreadsFile(mainThreadName);
+        QFile mainThreadsFile(appDir.absoluteFilePath("MainThreads.xml"));
         mainThreadsFile.open(QIODevice::ReadOnly);
+        qDebug() << mainThreadsFile.objectName();
         QDomDocument mainThreadsDoc;
         mainThreadsDoc.setContent(&mainThreadsFile);
         mainThreadsFile.close();
@@ -319,6 +365,7 @@ void clientSender::update(QString fileName)
         thread.appendChild(doc.createElement("posts"));
         doc.appendChild(thread);
     }
+    qDebug() << file.objectName();
     file.resize(0);
     QDomNode ele = doc.firstChildElement("thread");
     if(ele.isNull()){
@@ -326,7 +373,12 @@ void clientSender::update(QString fileName)
     }
     QDomElement header = doc.createElement("header");
     header.appendChild(doc.createTextNode("update"));
-    ele.appendChild(header);
+    if(!ele.firstChildElement("header").isNull()){
+        ele.insertBefore(header, ele.firstChildElement("header"));
+    }else{
+        ele.appendChild(header);
+    }
+
     QByteArray array = doc.toByteArray();
     file.write(array);
     if(socket->isOpen()){
@@ -341,9 +393,15 @@ void clientSender::update(QString fileName)
 
 }
 
-QString clientSender::getAppPath()
+QString clientSender::getAppPath(QString fileName)
 {
-    return appDir.path();
+    return appDir.absoluteFilePath(fileName);
+}
+
+void clientSender::copy(QString text)
+{
+    QClipboard *clipBoard = QApplication::clipboard();
+    clipBoard->text(text);
 }
 
 void clientSender::articleAdder(QDomDocument doc, QString article)
@@ -361,7 +419,8 @@ void clientSender::articleAdder(QDomDocument doc, QString article)
     QDomElement enabled = doc.createElement("enabled");
     QString artString = article;
     if(!artString.contains("http://")){
-        artString = "http://" + artString;
+
+        artString.insert(0, "http://");
     }
     source.appendChild(doc.createTextNode(artString));
     fair.appendChild(doc.createTextNode("0"));
@@ -373,4 +432,6 @@ void clientSender::articleAdder(QDomDocument doc, QString article)
     articleTag.appendChild(bias);
     articles.appendChild(articleTag);
 }
+
+
 

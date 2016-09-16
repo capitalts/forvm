@@ -11,7 +11,7 @@ Rectangle{
     height: background.height
     XmlListModel{
         id: postModel
-        source: "file:///" + client.getAppPath() + "/" + threadSource
+        source: "file:///" + client.getAppPath(threadSource)
         query: "/thread/posts/post"
 
         XmlRole{
@@ -35,6 +35,13 @@ Rectangle{
         anchors.top:articleBack.bottom
         width: parent.width
         height: parent.height - articleBack.height
+        Text{
+            x: postBackground.width/2 - width/2
+            y:-postList.contentY -75
+            text: qsTr("Pull to Refresh")
+            font.pointSize: 20
+            color: "white"
+        }
             ListView{
                 id: postList
                 anchors.fill: parent
@@ -43,7 +50,6 @@ Rectangle{
                 spacing: 2
                 onDragEnded: if(contentY < -100){
                                        client.update(threadSource)
-                                       postModel.reload()
                                    }
 
             }
@@ -54,12 +60,11 @@ Rectangle{
         height: root.height/4.5
         width: root.width
         color: "black"
-
     }
 
     XmlListModel{
         id: artModel
-        source: "file:///" + client.getAppPath() + "/" + threadSource
+        source: "file:///" + client.getAppPath(threadSource)
         query: "/thread/articles/article"
             XmlRole{
                 name: "artTitle"; query: "title/string()"
@@ -91,9 +96,8 @@ Rectangle{
         orientation: ListView.Horizontal
         delegate: ArticleDel {}
         spacing: 5
-        onDragEnded: if(contentX < -100 || contentX > contentWidth + 100){
+        onDragEnded: if(contentX < -75 || contentX > contentWidth + 75){
                                client.update(threadSource)
-                               artModel.reload()
                            }
     }
     Reply{

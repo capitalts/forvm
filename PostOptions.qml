@@ -24,7 +24,7 @@ Rectangle{
         id: outsideMA
         width: root.width
         height: root.height
-        x: root.x
+        x: -root.width + postOptionsRect.width
         onClicked: postOptionsRect.state = "POSTOPNOTVISIBLE"
     }
     Component{
@@ -49,7 +49,11 @@ Rectangle{
                         postOptionsRect.state = "POSTOPNOTVISIBLE"
                         if(name === "Reply"){
                         reply.state = "REPLYVISIBLE"
-                        reply.repText.text = ">>" + postNumber
+                        reply.repText.text = ">> " + postNumber
+                        }else if(name === "Quote"){
+                            reply.state = "REPLYVISIBLE"
+                            reply.repText.text = ">> " + postNumber + "\n" + "\"" + postText + "\""
+
                         }
                     }
                 }

@@ -10,9 +10,10 @@ RESOURCES += qml.qrc
 
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH +=
+QML_IMPORT_PATH += $$PWD
 
 # Default rules for deployment.
+include(vendor/vendor.pri)
 include(deployment.pri)
 
 DISTFILES +=

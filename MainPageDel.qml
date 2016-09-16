@@ -9,52 +9,75 @@ Component{
         property int inter: Math.random()*(5000 - 3000 + 1) + 3000
         width: threadGrid.cellWidth-4
         height: threadGrid.cellHeight-4
-        color: "grey"
+        color: "darkgrey"
         Text{
             id: title
             text: thrdTitle
-            anchors.top: thread.top
+            anchors.bottom: thread.bottom
             anchors.left: thread.left
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             color: "white"
-            font.pointSize: 20
+            font.pointSize: 15
             width: thread.width
         }
 
-           Timer {
-                interval: inter;
-                running: true;
-                repeat: true
-                triggeredOnStart: true
-                onTriggered: {
-                    thread.state = previousState
-                    if(previousState == "SHOWTITLE"){
-                        previousState = "SHOWIMAGE"
-                    }else{
-                        previousState = "SHOWTITLE"
-                    }
+//           Timer {
+//                interval: inter;
+//                running: true;
+//                repeat: true
+//                triggeredOnStart: true
+//                onTriggered: {
+//                    thread.state = previousState
+//                    if(previousState == "SHOWTITLE"){
+//                        previousState = "SHOWIMAGE"
+//                    }else{
+//                        previousState = "SHOWTITLE"
+//                    }
 
-                }
-            }
+//                }
+//            }
+
+//            Image{
+//                id: articleImage
+//                width: thread.width
+//                height: thread.height
+
+//                source: threadImg
+//            }
+        Flickable{
+            id:imageFlick
+            anchors.fill: parent
+            contentWidth: parent.width
+            contentHeight: parent.height + title.height
 
             Image{
                 id: articleImage
-                width: thread.width
-                height: thread.height
-
+                width: imageFlick.width
+                height: imageFlick.height
                 source: threadImg
-            }
-
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked:{
-                    threadSource = threadSrc
-                    client.update(threadSrc)
-                    threadClicked = true
-//                    root.state = "LOADINGTHREAD"
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:{
+                        threadSource = threadSrc
+                        client.update(threadSource)
+                        threadClicked = true
+                    }
                 }
             }
+            flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+
+        }
+
+
+//            MouseArea{
+//                anchors.fill: parent
+//                onClicked:{
+//                    threadSource = threadSrc
+//                    client.update(threadSource)
+//                    threadClicked = true
+//                }
+//            }
     states:[
         State{
             name: "SHOWIMAGE"

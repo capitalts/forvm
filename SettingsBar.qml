@@ -43,13 +43,6 @@ Rectangle {
         }
     }
 
-    MouseArea{
-        id: outsideMA
-        width: root.width
-        height: root.height
-        x:root.x
-        onClicked: settingsBar.state = "SETNOTVISIBLE"
-    }
 
     Component{
         id: settingsBarDel
@@ -83,6 +76,14 @@ Rectangle {
             }
         }
     }
+
+    MouseArea{
+        id: outsideMA
+        width: root.width
+        height: root.height
+        x:-root.width + settingsBar.width
+        onClicked: settingsBar.state = "SETNOTVISIBLE"
+    }
     Column{
         id: settingsBarList
         anchors.fill: parent
@@ -93,6 +94,8 @@ Rectangle {
         model: mainPageSettingsBarMod
         }
     }
+
+
 
     states:[
         State {

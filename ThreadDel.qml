@@ -1,5 +1,7 @@
  import QtQuick 2.4
-
+ import QtQuick.Controls 2.0 as Control
+ import QuickAndroid 0.1
+ import QuickAndroid.Styles 0.1
 Component{
     id: threadDel
 
@@ -13,16 +15,21 @@ Component{
 
 
         antialiasing: true
-        Text {
+        Text{
             id: postTxt
             text: postText
-            wrapMode: Text.WordWrap
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             anchors.top: title.bottom
             anchors.topMargin: 5
             anchors.left: parent.left
             anchors.leftMargin: 3
             font.pointSize: postFontSize
-            width: postRect.width
+            width: postRect.width -3
+
+
+
+
+
         }
         Rectangle{
             id: title
@@ -60,8 +67,6 @@ Component{
                     }else{
                         postOp.state = "POSTOPNOTVISIBLE"
                     }
-
-
                 }
             }
 
@@ -73,6 +78,7 @@ Component{
                 anchors.right: postColumn.left
                 anchors.rightMargin: 5
                 anchors.verticalCenter: title.verticalCenter
+
 
             }
             Rectangle{

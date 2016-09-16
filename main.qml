@@ -3,6 +3,7 @@ import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.XmlListModel 2.0
+import QuickAndroid 0.1
 ApplicationWindow{
     height: 600
     width: 400
@@ -31,7 +32,7 @@ ApplicationWindow{
 
         XmlListModel{
             id: mainModel
-            source: "file:///" + client.getAppPath() + "/MainThreads.xml";
+            source: "file:///" + client.getAppPath("MainThreads.xml")
             query: "/threads/thread"
 
             XmlRole{
@@ -49,10 +50,15 @@ ApplicationWindow{
             target: client
             onFinishedReading:{
                 if(threadClicked || newThrd.state == "SUBMITCLICKED"){
-                    thread.postMod.reload()
-                    thread.artMod.reload()
                     root.state = "THREAD"
                     threadClicked = false
+                    thread.postMod.reload()
+                    thread.artMod.reload()
+                } else if(root.state == "MAIN"){
+                    mainModel.reload()
+                }else if(root.state == "THREAD"){
+                    thread.postMod.reload()
+                    thread.artMod.reload()
                 }
             }
         }
@@ -60,9 +66,17 @@ ApplicationWindow{
         Rectangle{
             id: background
             y:topBar.height + 2
+            x: 2
             width: root.width
             height: root.height - topBar.height
-            color: "black"
+            color: "grey"
+            Text{
+                x: background.width/2 - width/2
+                y:-threadGrid.contentY -75
+                text: qsTr("Pull to Refresh")
+                font.pointSize: 20
+                color: "white"
+            }
             GridView{
                 id: threadGrid
                 cellWidth: parent.width/2
@@ -72,7 +86,6 @@ ApplicationWindow{
                 delegate: MainPageDel {}
                 onDragEnded: if(contentY < -100){
                                  client.update("MainThreads.xml")
-                                 mainModel.reload()
                              }
             }
     }
@@ -92,11 +105,6 @@ ApplicationWindow{
             enabled: false
         }
 
-        SettingsBar{
-            id: setBar
-            anchors.right: root.right
-            anchors.top: topBar.bottom
-        }
 
         EditIcon{
             id: edIc
@@ -105,6 +113,12 @@ ApplicationWindow{
         NewThread{
             id:newThrd
             state: "NEWTHREADNOTVISIBLE"
+        }
+
+        SettingsBar{
+            id: setBar
+            anchors.right: root.right
+            anchors.top: topBar.bottom
         }
 
         states: [
@@ -127,6 +141,7 @@ ApplicationWindow{
                     target: thread
                     x: root.width
                     enabled: false
+
                 }
                 PropertyChanges {
                     target: sets
@@ -157,6 +172,7 @@ ApplicationWindow{
                 PropertyChanges {
                     target: thread
                     x: 0
+
                 }
                 PropertyChanges{
                     target: thread.replyState

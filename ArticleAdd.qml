@@ -1,18 +1,22 @@
 import QtQuick 2.0
-
+import QuickAndroid 0.1
 Rectangle {
     property variant arts: [""]
     id: artAddRect
     width: background.width
-    height: background.height/8
+    height: background.height/6
     y: 0
     color: "darkgrey"
     state: "ARTADDNOTVISIBLE"
+    MouseArea{
+        id: backMA
+        anchors.fill: parent
+    }
 
     Text {
         id: postIn
-        text: qsTr("Add Article To: " + threadTitle)
-        font.pointSize: 15
+        text: qsTr("Add Article")
+        font.pointSize: 30
         anchors.top: parent.top
         anchors.topMargin: 10
         anchors.horizontalCenter: parent.horizontalCenter
@@ -71,13 +75,13 @@ Rectangle {
     }
     Rectangle{
         id: artAddTextRect
-        height: parent.height/3
+        height: postFontSize*4
         width: parent.width-5
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: postIn.bottom
         color: "lightgrey"
 
-            TextEdit{
+            TextField{
                 id: artAddText
                 width: parent.width
                 height: parent.height
@@ -121,6 +125,10 @@ Rectangle {
             PropertyChanges {
                 target: artAddRect
                 y: -artAddRect.height - cancel.height-topBar.height
+                enabled: false
+            }
+            PropertyChanges {
+                target: backMA
                 enabled: false
             }
 
